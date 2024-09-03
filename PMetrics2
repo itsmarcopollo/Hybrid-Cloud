@@ -1,0 +1,101 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import mplcyberpunk
+from qbstyles import mpl_style
+
+plt.rcParams['font.weight'] = 'bold'
+plt.rcParams['font.family'] = 'Gurajada'
+plt.rcParams['font.size'] = 16 
+
+def PerformanceMetrics():
+    def read_values(filename):
+        values = []
+        with open(filename, 'r') as file:
+            for line in file:
+                values.append(float(line.strip()))
+        return values
+        
+    def Accuracy():
+        font = {'family': 'Gurajada', 'color': 'black', 'size': 18, 'weight':'bold'}
+        f3 = "ACC.txt"
+        a_c_c = read_values(f3)
+        indices = range(1, len(a_c_c) + 1)
+        plt.style.use('ggplot')
+        plt.rcParams['font.weight'] = 'bold'
+        plt.rcParams['font.family'] = 'Gurajada'
+        plt.rcParams['font.size'] = 14
+        plt.bar(indices, a_c_c, color='#FF7D40', edgecolor='#4B0082', linewidth=2, label='Proposed Hybrid Cloud Security with Advanced Cyber Solutions')
+        plt.title('Accuracy Graph', fontdict=font)
+        plt.xlabel('Number of Users', fontdict=font)
+        plt.ylabel('Accuracy [%]', fontdict=font)
+        print("\n=====================\n  1. Accuracy Graph\n=====================\n")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+        os.remove(f3)
+    
+    def Efficiency():
+        font = {'family': 'Gurajada', 'color': 'black', 'size': 18, 'weight':'bold'} 
+        f2 = "EFF.txt"
+        e_f_f = read_values(f2)
+        indices = range(1, len(e_f_f) + 1)
+        plt.style.use('ggplot')
+        plt.rcParams['font.weight'] = 'bold'
+        plt.rcParams['font.family'] = 'Gurajada'
+        plt.rcParams['font.size'] = 14
+        plt.plot(indices, e_f_f, color='#800000', marker='s',markersize = 7,mfc= '#B0E0E6', mec='#33A1C9', linestyle='--', linewidth=2, label='Proposed Hybrid Cloud Security with Advanced Cyber Solutions')
+        plt.title('Efficiency Graph', fontdict=font)
+        plt.xlabel('Number of Users', fontdict=font)
+        plt.ylabel('Efficiency [%]', fontdict=font)
+        print("\n=======================\n  2. Efficiency Graph\n=======================\n")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+        os.remove(f2)
+
+    def Authentication_Time():
+        font = {'family': 'Gurajada', 'size': 18, 'weight':'bold'}
+        f4 = "AT.txt"
+        a_t = read_values(f4)
+        indices = range(1, len(a_t) + 1)
+        plt.style.use('cyberpunk')
+        plt.rcParams['font.weight'] = 'bold'
+        plt.rcParams['font.family'] = 'Gurajada'
+        plt.rcParams['font.size'] = 14
+        plt.plot(indices, a_t, color='#CAFF70', marker='s', mfc='#9400D3', mec='#9400D3', linestyle='-.', linewidth=2, label='Proposed Hybrid Cloud Security with Advanced Cyber Solutions')
+        plt.title('Authentication Time Graph', fontdict=font)
+        plt.xlabel('Number of Users', fontdict=font)
+        plt.ylabel('Authentication Time [ms]', fontdict=font)
+        print("\n================================\n  4. Authentication Time Graph\n================================\n")
+        plt.legend()
+        mplcyberpunk.add_glow_effects(gradient_fill=True)
+        plt.grid(True)
+        plt.show()
+        os.remove(f4)
+    
+    def Encryption_Time():
+        font = {'family': 'Gurajada', 'size': 18, 'weight':'bold'}
+        f3 = "ET.txt"
+        e_t = read_values(f3)
+        indices = range(1, len(e_t) + 1)
+        plt.style.use('cyberpunk')
+        plt.rcParams['font.weight'] = 'bold'
+        plt.rcParams['font.family'] = 'Gurajada'
+        plt.rcParams['font.size'] = 14
+        plt.bar(indices, e_t, color='#32CD32', edgecolor='#CD2626', linewidth=2, label='Proposed Hybrid Cloud Security with Advanced Cyber Solutions')
+        plt.title('Encryption Time Graph', fontdict=font)
+        plt.xlabel('Number of Users', fontdict=font)
+        plt.ylabel('Encryption Time [ms]', fontdict=font)
+        print("\n============================\n  3. Encryption Time Graph\n============================\n")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+        os.remove(f3)
+
+    Accuracy()  # lightbar
+    Efficiency()  # lightplot
+    Encryption_Time()  # darkbar
+    Authentication_Time()  # darkplot
+    
+PerformanceMetrics()
