@@ -1,0 +1,50 @@
+from Crypto.Cipher import AES
+import os
+import time
+def xor_encrypt_decrypt(data, key):
+    return bytearray([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+def generate_aes_key():
+    return os.urandom(16)
+
+def process_user_data(file_path):
+    encrypted_users = []
+    decrypted_users = []
+    with open(file_path, 'r') as file:
+        user_data = file.read().split("===========================================")
+
+    for idx, user in enumerate(user_data, start=1):
+        if user.strip():
+            lines = user.strip().split('\n')
+            user_dict = {}
+            for line in lines:
+                if line.strip():
+                    key, value = line.split(': ', 1)
+                    user_dict[key.strip()] = value.strip()
+                              
+            user_bytes = bytearray(str(user_dict).encode('utf-8'))
+            aes_key = generate_aes_key()
+            encrypted_data = xor_encrypt_decrypt(user_bytes, aes_key)
+            encrypted_users.append(encrypted_data)
+            decrypted_data = xor_encrypt_decrypt(encrypted_data, aes_key)
+            decrypted_users.append(decrypted_data.decode('utf-8'))
+            print(f"User {idx}:")
+            print(f"Encrypted Data: {encrypted_data.hex()}\n")
+            print(f"Decrypted Data: {decrypted_data.decode('utf-8')}\n")
+            print("=" * 50+"\n")
+
+    return encrypted_users, decrypted_users
+
+if __name__ == "__main__":
+    file_path = 'Decrypted_Data.txt'
+    print("\n================================\nEncrypted and Decrypted Data:\n================================\n\n")
+    time.sleep(5)
+    encrypted_users, decrypted_users = process_user_data(file_path)
+    with open('Encrypted_Data.txt', 'wb') as enc_file:
+        for encrypted_user in encrypted_users:
+            enc_file.write(encrypted_user + b'\n')
+
+    with open('Decrypted_Data_Verified.txt', 'w') as dec_file:
+        for decrypted_user in decrypted_users:
+            dec_file.write(decrypted_user + '\n===========================================\n')
+
