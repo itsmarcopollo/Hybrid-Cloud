@@ -1,0 +1,84 @@
+import time
+
+def read_users_from_file(file_path):
+    users = []
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        for i in range(0, len(lines), 6):
+            if '===========================================' in lines[i]:
+                continue
+            users_data = lines[i:i+5]
+            users.append({
+                'username': users_data[0].split(': ')[1].strip(),
+                'password': users_data[1].split(': ')[1].strip(),
+                'user_id': users_data[2].split(': ')[1].strip(),
+                'phNum': users_data[3].split(': ')[1].strip(),
+                'api_key': users_data[4].split(': ')[1].strip()
+            })
+    return users
+
+def authenticate(user_id, password, api_key, users):
+    for dev in users:
+        if (
+            dev['user_id'] == user_id
+            and dev['password'] == password
+            and dev['api_key'] == api_key
+        ):
+            return True
+    return False
+
+def save_authentication_result(auth_result):
+    with open("authentication_log.txt", "a") as file:
+        if auth_result:
+            file.write("Authentication successful!\n")
+        else:
+            file.write("Authentication failed!\n")
+
+def main():
+    file_path = "User_Datas.txt"
+    users_data = read_users_from_file(file_path)
+    print("\n=====================\nEnter User Details:\n=====================\n")
+    time.sleep(3)
+    while True:
+        user_id_input = input('Enter user ID: ')
+        user = next((user for user in users_data if user['user_id'] == user_id_input), None)
+        if user:
+            break
+        print("Wrong User ID! Please try again.")
+
+    while True:
+        password_input = input(f'Enter password for user {user["username"]}: ')
+        if user['password'] == password_input:
+            break
+        print(f"Invalid password for User ID {user_id_input}. Please try again.")
+
+    api_key_input = input('Enter API Key: ')
+    if user['api_key'] == api_key_input:
+        auth_result = True
+    else:
+        print('''
+              |=======================================================|
+              |                                                       | 
+              |  User Authentication Failed! Try Again!!!! --[ 👎️ ]-- |
+              |                                                       |
+              |=======================================================|
+              ''')
+        auth_result = False
+
+    save_authentication_result(auth_result)
+    if auth_result:
+        print('''
+              |==================================================|
+              |                                                  | 
+              |  User Authentication successfully!!!! --[ 👍️ ]-- |
+              |                                                  |
+              |==================================================|
+              ''')
+    else:
+    	time.sleep(2)
+    	main()
+
+if __name__ == "__main__":
+    print("\n=========================\nAuthentication Process:\n=========================\n\n")
+    time.sleep(1)
+    main()
