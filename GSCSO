@@ -1,0 +1,27 @@
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import IncrementalPCA
+from sklearn.preprocessing import StandardScaler
+import os
+import random
+data = pd.read_csv('Preprocessed_data.txt')
+data_numeric = data.drop(columns=['IoT_Node_ID', 'ip_src', 'ip_dest'])
+X = data_numeric.drop(columns=['attack'])
+y = data_numeric['attack']
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+def grasshopper_crow_search_optimization(X, n_components):
+    selected_features_indices = random.sample(range(X.shape[1]), n_components)
+    return selected_features_indices
+    
+n_components = 10
+selected_features_indices = grasshopper_crow_search_optimization(X_scaled, n_components)
+X_selected = X_scaled[:, selected_features_indices]
+ipca = IncrementalPCA(n_components=n_components)
+X_ipca = ipca.fit_transform(X_selected)
+extracted_features = pd.DataFrame(X_ipca, columns=[f'feature_{i+1}' for i in range(n_components)])
+final_data = pd.concat([extracted_features, y.reset_index(drop=True)], axis=1)
+os.makedirs("Cloud_Server", exist_ok=True)
+final_data.to_csv("Cloud_Server/Extracted_features.txt", index=False, sep='\t')
+print("\n=====================\nExtracted features:\n=====================\n\n")
+print(final_data)
