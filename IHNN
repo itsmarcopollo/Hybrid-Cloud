@@ -1,0 +1,26 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report, accuracy_score
+import random
+data = pd.read_csv('Preprocessed_data.txt')
+features = data.drop(columns=['IoT_Node_ID', 'attack','ip_src','ip_dest'])
+target = data['attack']
+X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.3, random_state=42)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+ihnn_model = MLPClassifier(hidden_layer_sizes=(10, 10), max_iter=1000, random_state=42)
+ihnn_model.fit(X_train, y_train)
+y_pred = ihnn_model.predict(X_test)
+random_indices = random.sample(range(X_test.shape[0]), 5)
+selected_X_test = X_test[random_indices]
+true_values = y_test.iloc[random_indices].values
+predicted_values = y_pred[random_indices]
+classification_rep = classification_report(y_test, y_pred)
+print("\n========================\nClassification Report:\n========================\n\n", classification_rep)
+print("True Values:", true_values)
+print("\nPredicted Values:", predicted_values)
+print("\n")
