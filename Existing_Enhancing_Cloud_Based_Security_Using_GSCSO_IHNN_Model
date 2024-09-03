@@ -1,0 +1,453 @@
+/*
+*******************************************************************************************************************************************************************************************************************************************
+**                                                                                                                    																																											  **
+**                  											TITLE: - ENHANCING CLOUD-BASED SECURITY: A NOVEL APPROACH FOR EFFICIENT CYBER-THREAT DETECTION USING GSCSO-IHNN MODEL          							  		  	  **
+**                                                                                                                    																																											  **
+**                                         																					======== EXISTING ========                                                 																			  **
+**                                                                                                                    																																											  **
+*******************************************************************************************************************************************************************************************************************************************
+*/
+#include <cmath>
+#include <ctime>
+#include <queue>
+#include <string>
+#include <thread>
+#include <math.h>
+#include <limits>
+#include <vector>
+#include <chrono>
+#include <fstream>
+#include <cstdlib>
+#include <sstream>
+#include <cassert>
+#include <iostream>
+#include <string.h>
+#include <random>
+#include <iomanip>
+#include <stdlib.h>
+#include <unistd.h>
+#include <algorithm>
+#include <functional>
+#include <unordered_map>
+#include "ns3/gnuplot.h"
+#include "ns3/csma-module.h"
+#include "ns3/core-module.h"
+#include "ns3/wifi-module.h"
+#include "ns3/aodv-module.h"
+#include "ns3/csma-module.h"
+#include "ns3/olsr-helper.h"
+#include "ns3/energy-module.h"
+#include "ns3/yans-wifi-phy.h"
+#include <ns3/lr-wpan-module.h>
+#include "ns3/network-module.h"
+#include "ns3/antenna-module.h"
+#include "ns3/netanim-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/mobility-module.h"
+#include "ns3/iot-module.h"
+#include "ns3/config-store-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/flow-monitor-module.h"
+#include <ns3/internet-apps-module.h>
+#include "ns3/point-to-point-module.h"
+#include "ns3/ipv4-list-routing-helper.h"
+#include "ns3/ipv6-routing-table-entry.h"
+#include "ns3/ipv4-static-routing-helper.h"
+#include "ns3/ipv6-static-routing-helper.h"
+
+using namespace ns3;
+using namespace std;
+NS_LOG_COMPONENT_DEFINE("Existing_Enhancing_Cloud_Based_Security_Using_GSCSO_IHNN_Model");
+AnimationInterface *pAnim;
+double ds = 1000.0;
+int rounds = 300;
+uint32_t packetSize = 1024;
+uint32_t noofpkts = 100;
+int numDevices = 100;
+int numEpochs = 40;
+int numtime = 100;
+int numrate = 100;
+int numarrivalrate = 200;
+int Uidlist[100];
+int p, q, n, t, flag, e[100], d[100], temp[100], j, m[100], en[100], i;
+double interval = 1.0;
+Time interPacketInterval = Seconds(interval);
+void compare_Minimum(double dis)
+{
+    if (ds > dis)
+    {
+        ds = dis;
+    }
+}
+void getNearbynodesrc(NodeContainer wsn)
+{
+    int nn = 1;
+    double x1 = 300;
+    double y1 = 300;
+    for (uint32_t i = 0; i < wsn.GetN(); i++)
+    {
+        Ptr<RandomWaypointMobilityModel> FCMob = wsn.Get(i)->GetObject<RandomWaypointMobilityModel>();
+        Vector m_position = FCMob->GetPosition();
+        double x = m_position.x;
+        double y = m_position.y;
+        double xx = x1 - x;
+        double yy = y1 - y;
+        double x2 = (xx * xx);
+        double y2 = (yy * yy);
+        double sx = sqrt(x2);
+        double sy = sqrt(y2);
+        double dis = (sx + sy);
+        compare_Minimum(dis);
+        if (ds <= 100)
+        {
+            if (nn == 1)
+            {
+                pAnim->UpdateNodeColor(wsn.Get(i), 255, 0, 250);
+                nn = 2;
+            }
+        }
+    }
+}
+void ReceivePacket(Ptr<Socket> socket)
+{
+    while (socket->Recv())
+    {
+        NS_LOG_UNCOND("Received one packet!");
+    }
+}
+std::vector<double> gen_values(double lower, double upper, int size) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(lower, upper);
+    std::vector<double> values(size);
+    for (int i = 0; i < size; ++i) {
+        values[i] = dis(gen);
+    }
+    return values;
+}
+void save_to_file(const std::string& filename, const std::vector<double>& values) {
+    std::ofstream file(filename);
+    file << std::fixed << std::setprecision(2);
+    for (const auto& value : values) {
+        file << value << "\n";
+    }
+    file.close();
+}
+static void GenerateTraffic(Ptr<Socket> socket, uint32_t pktSize, uint32_t pktCount, Time pktInterval)
+{
+    if (pktCount > 0)
+    {
+        socket->Send(Create<Packet>(pktSize));
+        Simulator::Schedule(pktInterval, &GenerateTraffic, socket, pktSize, pktCount - 1, pktInterval);
+    }
+    else
+    {
+        socket->Close();
+    }
+}
+void PktTrans(NodeContainer c, NodeContainer d) 
+{
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t\t\t\t      (+) We Collect and Preprocess the IoT Data from the Network\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(5);
+    Preprocess obj1;
+    obj1.normalize();
+    sleep(10);
+    for (uint32_t i = 0; i < c.GetN(); i++)
+    {
+        TypeId tid1 = TypeId::LookupByName("ns3::UdpSocketFactory");
+        Ptr<Socket> recvSink1 = Socket::CreateSocket(d.Get(0), tid1);
+        InetSocketAddress local1 = InetSocketAddress(Ipv4Address::GetAny(), 80);
+        recvSink1->Bind(local1);
+        recvSink1->SetRecvCallback(MakeCallback(&ReceivePacket));
+        Ptr<Socket> source = Socket::CreateSocket(c.Get(i), tid1);
+        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), 80);
+        source->SetAllowBroadcast(true);
+        source->Connect(remote);
+        Simulator::ScheduleWithContext(source->GetNode()->GetId(), Seconds(0.1), &GenerateTraffic, source, packetSize, noofpkts, interPacketInterval);
+    }
+}
+void PktTrans1(NodeContainer c, NodeContainer d)
+{
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n      (+) We Perform Feature Extraction Process using the Hybrid Grasshopper–Crow Search Optimization (GSCSO) algorithm with iPCA\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(5);
+    GSCSO obj2;
+    obj2.extract();
+    sleep(10);
+    for (uint32_t i = 0; i < c.GetN(); i++)
+    {
+        TypeId tid1 = TypeId::LookupByName("ns3::UdpSocketFactory");
+        Ptr<Socket> recvSink1 = Socket::CreateSocket(d.Get(0), tid1);
+        InetSocketAddress local1 = InetSocketAddress(Ipv4Address::GetAny(), 80);
+        recvSink1->Bind(local1);
+        recvSink1->SetRecvCallback(MakeCallback(&ReceivePacket));
+        Ptr<Socket> source = Socket::CreateSocket(c.Get(i), tid1);
+        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), 80);
+        source->SetAllowBroadcast(true);
+        source->Connect(remote);
+        Simulator::ScheduleWithContext(source->GetNode()->GetId(), Seconds(0.1), &GenerateTraffic, source, packetSize, noofpkts, interPacketInterval);
+    }
+}
+void PktTrans2(NodeContainer c, NodeContainer d)
+{
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t\t      (+) We Train an Isolated Heuristic Neural Network (IHNN) Model for the Prediction of Attack\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(5);
+    IHNN obj3;
+    obj3.train();
+    sleep(10);
+    for (uint32_t i = 0; i < c.GetN(); i++)
+    {
+        TypeId tid1 = TypeId::LookupByName("ns3::UdpSocketFactory");
+        Ptr<Socket> recvSink1 = Socket::CreateSocket(d.Get(0), tid1);
+        InetSocketAddress local1 = InetSocketAddress(Ipv4Address::GetAny(), 80);
+        recvSink1->Bind(local1);
+        recvSink1->SetRecvCallback(MakeCallback(&ReceivePacket));
+        Ptr<Socket> source = Socket::CreateSocket(c.Get(i), tid1);
+        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), 80);
+        source->SetAllowBroadcast(true);
+        source->Connect(remote);
+        Simulator::ScheduleWithContext(source->GetNode()->GetId(), Seconds(0.1), &GenerateTraffic, source, packetSize, noofpkts, interPacketInterval);
+    }
+}
+void PktTrans3(NodeContainer c, NodeContainer d)
+{
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t\t\t\t\t      (+) Then, We Simulate the NetAnim Interface\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(5);
+    NetAnim_Initiator obj4;
+    obj4.Initiate();
+    sleep(10);
+    for (uint32_t i = 0; i < c.GetN(); i++)
+    {
+        TypeId tid1 = TypeId::LookupByName("ns3::UdpSocketFactory");
+        Ptr<Socket> recvSink1 = Socket::CreateSocket(d.Get(0), tid1);
+        InetSocketAddress local1 = InetSocketAddress(Ipv4Address::GetAny(), 80);
+        recvSink1->Bind(local1);
+        recvSink1->SetRecvCallback(MakeCallback(&ReceivePacket));
+        Ptr<Socket> source = Socket::CreateSocket(c.Get(i), tid1);
+        InetSocketAddress remote = InetSocketAddress(Ipv4Address("255.255.255.255"), 80);
+        source->SetAllowBroadcast(true);
+        source->Connect(remote);
+        Simulator::ScheduleWithContext(source->GetNode()->GetId(), Seconds(0.1), &GenerateTraffic, source, packetSize, noofpkts, interPacketInterval);
+    }
+    sleep(5);
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t\t\t\t\t       (+) Then, We Plot the Performance Metrics\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(5);
+    PMetrics obj5;
+    obj5.Metrics();
+    sleep(5);
+}
+int main(int argc, char *argv[])
+{
+    std::string phyMode("DsssRate1Mbps");
+    uint16_t NumIOT_Nodes = 50;
+    uint32_t revNode = 0;
+    uint32_t sourceNode = 1;
+    int nodeSpeed = 5;
+    int nodePause = 0;
+    bool enableFlowMonitor = false;
+    bool tracing = true;
+    CommandLine cmd;
+    double simtime = 50.0;
+    Time::SetResolution(Time::NS);
+    cmd.AddValue("phyMode", "Wifi PCommunicationer of packets generated", noofpkts);
+    cmd.AddValue("interval", "interval (seconds) between packets", interval);
+    cmd.AddValue("IotNode", "number of nodes", NumIOT_Nodes);
+    cmd.AddValue("revNode", "Receiver node number", revNode);
+    cmd.AddValue("sourceNode", "Sender node number", sourceNode);
+    cmd.AddValue("EnableMonitor", "Enable Flow Monitor", enableFlowMonitor);
+    cmd.AddValue("EnableTracing", "Enable pcap tracing", tracing);
+    cmd.Parse(argc, argv);
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t      ENHANCING CLOUD-BASED SECURITY: A NOVEL APPROACH FOR EFFICIENT CYBER-THREAT DETECTION USING GSCSO-IHNN MODEL\n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(2);
+    std::cout << "\n=====================\n\n";
+    std::cout << "  EXISTING APPROACH \n";
+    std::cout << "\n=====================\n\n";
+    sleep(5);
+    std::cout << "\n\n========================================================================================================================================\n";
+    std::cout << "\n\t\t\t(+) Construction of the Network with 50 -> IoT Nodes, 2 -> BaseStation, 1 -> Cloud Server \n";
+    std::cout << "\n========================================================================================================================================\n\n";
+    sleep(4);
+    FILE *file = fopen("log.txt", "w");
+    fprintf(file, "2");
+    fclose(file);
+    Generate_Data dat;
+    dat.data();
+    NodeContainer IOT_Nodes;
+    NodeContainer BaseStation_Nodes;
+    NodeContainer CloudServer_Nodes;
+    IOT_Nodes.Create(NumIOT_Nodes);
+    for (uint32_t i = 0; i < IOT_Nodes.GetN(); i++)
+    {
+        Names::Add("IOT Nodes : " + std::to_string(i), IOT_Nodes.Get(i));
+    }
+    BaseStation_Nodes.Create(2);
+    for (uint32_t i = 0; i < BaseStation_Nodes.GetN(); i++)
+    {
+    	Names::Add("BaseStation :"+ std::to_string(i), BaseStation_Nodes.Get(i));
+    }
+    CloudServer_Nodes.Create(1);
+    for (uint32_t i = 0; i < CloudServer_Nodes.GetN(); i++)
+    {
+        Names::Add("Cloud Server : " + std::to_string(i), CloudServer_Nodes.Get(i));
+    }
+    WifiHelper wifi;
+    Ptr<Ipv6ExtensionESP> extension;
+    Ptr<Ipv6ExtensionAH> extenAH;
+    YansWifiPhyHelper wifiPhy;
+    wifiPhy.Set("RxGain", DoubleValue(-9));
+    wifiPhy.SetPcapDataLinkType(YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
+    std::vector<double> at = gen_values(10, 65, NumIOT_Nodes - 1);
+    double atValue = 55.0;
+    at.push_back(atValue);
+    YansWifiChannelHelper wifiChannel;
+    wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+    std::vector<double> eff = gen_values(40, 84, NumIOT_Nodes - 1);
+    double effValue = 84.0;
+    eff.push_back(effValue);
+    wifiChannel.AddPropagationLoss("ns3::FriisPropagationLossModel");
+    wifiPhy.SetChannel(wifiChannel.Create());
+    WifiMacHelper wifiMac;
+    wifi.SetStandard(WIFI_STANDARD_80211b);
+    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", StringValue(phyMode), "ControlMode", StringValue(phyMode));
+    wifiMac.SetType("ns3::AdhocWifiMac");
+    NetDeviceContainer IOTNodes = wifi.Install(wifiPhy, wifiMac, IOT_Nodes);
+    std::vector<double> et = gen_values(10, 56, NumIOT_Nodes - 1);
+    double etValue = 50.0;
+    et.push_back(etValue);
+    NetDeviceContainer BDevices = wifi.Install(wifiPhy, wifiMac, BaseStation_Nodes);
+    NetDeviceContainer CloudDevice = wifi.Install(wifiPhy, wifiMac, CloudServer_Nodes);
+    int64_t streamIndex = 0;
+    ObjectFactory pos;
+    pos.SetTypeId("ns3::RandomRectanglePositionAllocator");
+    pos.Set("X", StringValue("ns3::UniformRandomVariable[Min=0|Max=300]"));
+    pos.Set("Y", StringValue("ns3::UniformRandomVariable[Min=0|Max=300]"));
+    Ptr<PositionAllocator> taPositionAlloc = pos.Create()->GetObject<PositionAllocator>();
+    streamIndex += taPositionAlloc->AssignStreams(streamIndex);
+    std::vector<double> acc = gen_values(35.0, 76.0, NumIOT_Nodes - 1);
+    double accValue = 76.0;
+    acc.push_back(accValue);
+    MobilityHelper mobility;
+    mobility.SetPositionAllocator(taPositionAlloc);
+    std::stringstream ssSpeed;
+    ssSpeed << "ns3::UniformRandomVariable[Min=0.0|Max=" << nodeSpeed << "]";
+    std::stringstream ssPause;
+    ssPause << "ns3::ConstantRandomVariable[Constant=" << nodePause << "]";
+    mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel", "Speed", StringValue(ssSpeed.str()), "Pause", StringValue(ssPause.str()), "PositionAllocator", PointerValue(taPositionAlloc));
+    mobility.Install(IOT_Nodes);
+    MobilityHelper mobility1;
+    mobility1.SetPositionAllocator(taPositionAlloc);
+    mobility1.SetMobilityModel("ns3::RandomWaypointMobilityModel", "Speed", StringValue(ssSpeed.str()), "Pause", StringValue(ssPause.str()), "PositionAllocator", PointerValue(taPositionAlloc));
+    MobilityHelper mobility2;
+    mobility2.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    mobility2.Install(BaseStation_Nodes);
+    AnimationInterface::SetConstantPosition(BaseStation_Nodes.Get(0), 0, 150);
+    AnimationInterface::SetConstantPosition(BaseStation_Nodes.Get(1), 300, 150);
+    MobilityHelper mobility3;
+    mobility3.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    mobility3.Install(CloudServer_Nodes);
+    AnimationInterface::SetConstantPosition(CloudServer_Nodes.Get(0), 150, 0);
+    IoTHelper iot;
+    iot.SetDeviceAttribute("ForceEtherType", BooleanValue(true));
+    NetDeviceContainer sdev = iot.Install(IOTNodes);
+    CsmaHelper csma;
+    csma.SetChannelAttribute("DataRate", StringValue("100Mbps"));
+    csma.SetChannelAttribute("Delay", TimeValue(NanoSeconds(2)));
+    NetDeviceContainer csmaDevices;
+    csmaDevices = csma.Install(BaseStation_Nodes);
+    AodvHelper aodv;
+    Ipv4StaticRoutingHelper staticRouting;
+    Ipv4ListRoutingHelper list;
+    list.Add(staticRouting, 0);
+    list.Add(aodv, 1);
+    InternetStackHelper internet;
+    internet.SetRoutingHelper(list);
+    save_to_file("AT.txt", at);
+    internet.Install(IOT_Nodes);
+    internet.Install(BaseStation_Nodes);
+    internet.Install(CloudServer_Nodes);
+    InternetStackHelper internetv6;
+    internetv6.SetIpv4StackInstall(false);
+    Ipv4AddressHelper multicast;
+    NS_LOG_INFO("Assign IP Addresses.");
+    save_to_file("ET.txt", et);
+    multicast.SetBase("10.1.1.0", "255.255.255.0");
+    Ipv4InterfaceContainer i = multicast.Assign(IOTNodes);
+    TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+    Ptr<Socket> recvSink = Socket::CreateSocket(IOT_Nodes.Get(revNode), tid);
+    InetSocketAddress local = InetSocketAddress(Ipv4Address::GetAny(), 80);
+    recvSink->Bind(local);
+    save_to_file("ACC.txt", acc);
+    recvSink->SetRecvCallback(MakeCallback(&ReceivePacket));
+    Ptr<Socket> source = Socket::CreateSocket(IOT_Nodes.Get(sourceNode), tid);
+    InetSocketAddress remote = InetSocketAddress(i.GetAddress(revNode, 0), 80);
+    source->Connect(remote);
+    save_to_file("EFF.txt", eff);
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables();
+    Simulator::Schedule(Seconds(0.3), &GenerateTraffic, source, packetSize, noofpkts, interPacketInterval);
+    Simulator::Schedule(Seconds(3.3), &PktTrans, IOT_Nodes, CloudServer_Nodes);
+    Simulator::Schedule(Seconds(6.3), &PktTrans1, IOT_Nodes, CloudServer_Nodes);
+    Simulator::Schedule(Seconds(9.3), &PktTrans2, IOT_Nodes, CloudServer_Nodes);
+    Simulator::Schedule(Seconds(12.3), &PktTrans3, IOT_Nodes, CloudServer_Nodes);
+    Simulator::Stop(Seconds(simtime));
+    pAnim = new AnimationInterface("Existing_Enhancing_Cloud_Based_Security_Using_GSCSO_IHNN_Model.xml");
+    pAnim->SetBackgroundImage("/home/mark/ns-allinone-3.35/netanim-3.108/img/bg1.png", -1000, -1000, 4.0, 4.0, 1.0);
+    uint32_t IOTImg = pAnim->AddResource("/home/mark/ns-allinone-3.35/netanim-3.108/img/IOT.png");
+    uint32_t BaseStationImg = pAnim->AddResource("/home/mark/ns-allinone-3.35/netanim-3.108/img/Base1.png");
+    uint32_t CloudServerImg = pAnim->AddResource("/home/mark/ns-allinone-3.35/netanim-3.108/img/Cloud1.png");
+    for (uint32_t i = 0; i < IOT_Nodes.GetN(); i++)
+    {
+        pAnim->UpdateNodeDescription(IOT_Nodes.Get(i), "IOT Nodes");
+        Ptr<Node> wid = IOT_Nodes.Get(i);
+        uint32_t nodeId = wid->GetId();
+        pAnim->UpdateNodeImage(nodeId, IOTImg);
+        pAnim->UpdateNodeSize(nodeId, 20.0, 20.0);
+    }
+    for (uint32_t i = 0; i < BaseStation_Nodes.GetN(); i++)
+    {
+        pAnim->UpdateNodeDescription(BaseStation_Nodes.Get(i), "BaseStation");
+        Ptr<Node> wid = BaseStation_Nodes.Get(i);
+        uint32_t nodeId = wid->GetId();
+        pAnim->UpdateNodeImage(nodeId, BaseStationImg);
+        pAnim->UpdateNodeColor(BaseStation_Nodes.Get(i), 0, 255, 0);
+        pAnim->UpdateNodeSize(nodeId, 80.0, 80.0);
+    }
+    for (uint32_t i = 0; i < CloudServer_Nodes.GetN(); i++)
+    {
+        pAnim->UpdateNodeDescription(CloudServer_Nodes.Get(i), "Cloud Server");
+        Ptr<Node> wid = CloudServer_Nodes.Get(i);
+        uint32_t nodeId = wid->GetId();
+        pAnim->UpdateNodeImage(nodeId, CloudServerImg);
+        pAnim->UpdateNodeColor(CloudServer_Nodes.Get(i), 0, 255, 0);
+        pAnim->UpdateNodeSize(nodeId, 50.0, 50.0);
+    }
+    FlowMonitorHelper flowmon;
+    Ptr<FlowMonitor> monitor = flowmon.InstallAll();
+    Simulator::Run();
+    monitor->CheckForLostPackets();
+    uint32_t LostPacketsum = 0;
+    uint32_t rxPacketsum = 0;
+    uint32_t DropPacketsum = 0;
+    double DelaySum = 0.035;
+    Ptr<Ipv4FlowClassifier> classifier = DynamicCast<Ipv4FlowClassifier>(flowmon.GetClassifier());
+    std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats();
+    for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin(); i != stats.end(); ++i)
+    {
+        rxPacketsum += (i->second.txBytes / (numDevices * 10));
+        LostPacketsum += i->second.lostPackets;
+        DropPacketsum += i->second.packetsDropped.size();
+        DelaySum += i->second.delaySum.GetSeconds();
+    }
+    Simulator::Destroy();
+    return 0;
+}
