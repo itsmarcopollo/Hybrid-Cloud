@@ -1,0 +1,56 @@
+import random
+import string
+import time
+NUM_USERS = 50
+class Device:
+    def __init__(self, user_name, password, user_id, phone_num, api_key):
+        self.user_name = user_name
+        self.password = password
+        self.user_id = user_id
+        self.phone_num = phone_num
+        self.api_key = api_key
+
+def generate_api_key():
+    return ''.join(random.choices(string.hexdigits.lower(), k=32))
+
+def Registration():
+    devices = []
+    for i in range(1, NUM_USERS + 1):
+        user_name = f"USER{i}"
+        password = f"PWD{i}"
+        user_id = str(random.randint(1000, 9999))
+        phone_num = str(random.randint(1000000000, 9999999999))
+        api_key = generate_api_key()
+        devices.append(Device(user_name, password, user_id, phone_num, api_key))
+    return devices
+    
+def print_user_details(devices):
+	for device in devices:
+            print(f"User_Name: {device.user_name}\n")
+            print(f"Password: {device.password}\n")
+            print(f"User_ID: {device.user_id}\n")
+            print(f"Phone_Number: {device.phone_num}\n")
+            print(f"API Key: {device.api_key}\n")
+            print("===========================================\n")
+
+
+def save_users_to_file(devices, file_path):
+    with open(file_path, 'w') as file:
+        for device in devices:
+            file.write(f"User_Name: {device.user_name}\n")
+            file.write(f"Password: {device.password}\n")
+            file.write(f"User_ID: {device.user_id}\n")
+            file.write(f"Phone_Number: {device.phone_num}\n")
+            file.write(f"API Key: {device.api_key}\n")
+            file.write("===========================================\n")
+            
+def main():
+    file_path = "User_Datas.txt"
+    devices = Registration()
+    print("\n==========================\nRegistered User Details:\n==========================\n")
+    time.sleep(3)
+    print_user_details(devices)
+    save_users_to_file(devices, file_path)
+
+if __name__ == "__main__":
+    main()
